@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestion des Réservations de Villas</title>
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="/stylesheets/style.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -90,6 +91,11 @@
             display: flex;
             gap: 10px;
             margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .search-box input {
+            flex: 1;
+            min-width: 200px;
         }
         .stats-grid {
             display: grid;
@@ -108,69 +114,95 @@
             font-weight: bold;
             color: #007bff;
         }
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+        }
+        .alert-info {
+            color: #31708f;
+            background-color: #d9edf7;
+            border-color: #bcdff1;
+        }
     </style>
 </head>
 <body>
-    <h1>Gestion des Réservations de Villas</h1>
+    <h1>{{ title }}</h1>
+    
+    {% if description %}
+    <div class="alert alert-info">
+        <p>{{ description }}</p>
+    </div>
+    {% endif %}
     
     <!-- Formulaire d'ajout de réservation -->
     <div class="container">
-        <h2>Ajouter une Réservation</h2>
+        <h2>🏖️ Formulaire de Réservation de Villa</h2>
         <form id="reservationForm">
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                 <div>
                     <div class="form-group">
-                        <label for="nom_client">Nom et Prénom:</label>
-                        <input type="text" id="nom_client" name="nom_client" required>
+                        <label for="nom_client">Nom et prénom :</label>
+                        <input type="text" id="nom_client" name="nom_client" required 
+                               placeholder="Ex: Mohamed Ben Salah">
                     </div>
                     
                     <div class="form-group">
-                        <label for="cin">CIN:</label>
-                        <input type="text" id="cin" name="cin" required>
+                        <label for="cin">CIN :</label>
+                        <input type="text" id="cin" name="cin" required 
+                               placeholder="Ex: 07455899">
                     </div>
                     
                     <div class="form-group">
-                        <label for="email">Email:</label>
-                        <input type="email" id="email" name="email" required>
+                        <label for="email">Adresse e-mail :</label>
+                        <input type="email" id="email" name="email" required 
+                               placeholder="Ex: mohamed@gmail.com">
                     </div>
                     
                     <div class="form-group">
-                        <label for="nombre_personnes">Nombre de Personnes:</label>
-                        <input type="number" id="nombre_personnes" name="nombre_personnes" min="1" required>
+                        <label for="nombre_personnes">Nombre de personnes :</label>
+                        <input type="number" id="nombre_personnes" name="nombre_personnes" 
+                               min="1" required placeholder="Ex: 4">
                     </div>
                 </div>
                 
                 <div>
                     <div class="form-group">
-                        <label for="prix_par_nuit">Prix par Nuit (DT):</label>
-                        <input type="number" id="prix_par_nuit" name="prix_par_nuit" min="1" step="0.01" required>
+                        <label for="prix_par_nuit">Prix par nuit (DT) :</label>
+                        <input type="number" id="prix_par_nuit" name="prix_par_nuit" 
+                               min="1" step="0.01" required placeholder="Ex: 150">
                     </div>
                     
                     <div class="form-group">
-                        <label for="date_arrivee">Date d'Arrivée:</label>
+                        <label for="date_arrivee">Date d'arrivée :</label>
                         <input type="date" id="date_arrivee" name="date_arrivee" required>
                     </div>
                     
                     <div class="form-group">
-                        <label for="date_depart">Date de Départ:</label>
+                        <label for="date_depart">Date de départ :</label>
                         <input type="date" id="date_depart" name="date_depart" required>
                     </div>
                     
                     <div class="form-group">
-                        <label for="reference_villa">Référence Villa:</label>
-                        <input type="text" id="reference_villa" name="reference_villa" required>
+                        <label for="reference_villa">Référence de la villa :</label>
+                        <input type="text" id="reference_villa" name="reference_villa" 
+                               required placeholder="Ex: VILLA-001">
                     </div>
                 </div>
             </div>
             
-            <button type="submit">Ajouter Réservation</button>
-            <button type="button" onclick="resetForm()">Réinitialiser</button>
+            <div style="margin-top: 20px;">
+                <button type="submit">🏡 Réserver</button>
+                <button type="button" onclick="resetForm()">🔄 Réinitialiser</button>
+                <button type="button" onclick="loadAllReservations()">📋 Afficher mes réservations</button>
+            </div>
         </form>
     </div>
     
     <!-- Recherche -->
     <div class="container">
-        <h2>Rechercher des Réservations</h2>
+        <h2>🔍 Rechercher des Réservations</h2>
         <div class="search-box">
             <input type="text" id="searchNom" placeholder="Rechercher par nom...">
             <button onclick="searchByNom()">Rechercher par Nom</button>
@@ -178,21 +210,22 @@
             <input type="text" id="searchCin" placeholder="Rechercher par CIN...">
             <button onclick="searchByCin()">Rechercher par CIN</button>
             
-            <button onclick="loadAllReservations()">Afficher Tout</button>
-            <button onclick="loadStats()">Statistiques</button>
+            <button onclick="loadAllReservations()">📋 Afficher Tout</button>
+            <button onclick="loadStats()">📊 Statistiques</button>
         </div>
     </div>
     
     <!-- Statistiques -->
     <div class="container" id="statsContainer" style="display: none;">
-        <h2>Statistiques Générales</h2>
+        <h2>📊 Statistiques Générales</h2>
         <div class="stats-grid" id="statsGrid">
+            <!-- Les statistiques seront chargées ici via JavaScript -->
         </div>
     </div>
     
     <!-- Liste des réservations -->
     <div class="container">
-        <h2>Liste des Réservations</h2>
+        <h2>📋 Mes Réservations</h2>
         <div id="reservationsList">
             <p>Chargement des réservations...</p>
         </div>
@@ -205,17 +238,17 @@
         
         // Écouter les notifications en temps réel
         socket.on('reservationAdded', (reservation) => {
-            showNotification('Nouvelle réservation ajoutée!', 'success');
+            showNotification('✅ Nouvelle réservation ajoutée!', 'success');
             loadAllReservations();
         });
         
         socket.on('reservationUpdated', (reservation) => {
-            showNotification('Réservation modifiée!', 'info');
+            showNotification('ℹ️ Réservation modifiée!', 'info');
             loadAllReservations();
         });
         
         socket.on('reservationDeleted', (data) => {
-            showNotification('Réservation supprimée!', 'error');
+            showNotification('🗑️ Réservation supprimée!', 'error');
             loadAllReservations();
         });
         
@@ -227,14 +260,24 @@
             document.body.appendChild(notification);
             
             setTimeout(() => {
-                document.body.removeChild(notification);
+                if (document.body.contains(notification)) {
+                    document.body.removeChild(notification);
+                }
             }, 3000);
         }
         
         // Charger toutes les réservations au démarrage
         document.addEventListener('DOMContentLoaded', () => {
             loadAllReservations();
+            setMinDate();
         });
+        
+        // Définir la date minimale à aujourd'hui
+        function setMinDate() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('date_arrivee').min = today;
+            document.getElementById('date_depart').min = today;
+        }
         
         // Gérer la soumission du formulaire
         document.getElementById('reservationForm').addEventListener('submit', async (e) => {
@@ -242,6 +285,12 @@
             
             const formData = new FormData(e.target);
             const data = Object.fromEntries(formData);
+            
+            // Validation côté client
+            if (new Date(data.date_depart) <= new Date(data.date_arrivee)) {
+                showNotification('⚠️ La date de départ doit être après la date d\'arrivée', 'error');
+                return;
+            }
             
             try {
                 const response = await fetch('/reservations', {
@@ -255,14 +304,15 @@
                 const result = await response.json();
                 
                 if (response.ok) {
-                    showNotification('Réservation ajoutée avec succès!', 'success');
+                    showNotification('✅ Réservation ajoutée avec succès!', 'success');
                     resetForm();
                     loadAllReservations();
                 } else {
-                    showNotification(result.error ? result.error.join(', ') : 'Erreur lors de l\'ajout', 'error');
+                    const errorMsg = result.error ? result.error.join(', ') : 'Erreur lors de l\'ajout';
+                    showNotification('❌ ' + errorMsg, 'error');
                 }
             } catch (error) {
-                showNotification('Erreur de connexion', 'error');
+                showNotification('❌ Erreur de connexion', 'error');
             }
         });
         
@@ -274,14 +324,17 @@
                 displayReservations(reservations);
                 document.getElementById('statsContainer').style.display = 'none';
             } catch (error) {
-                document.getElementById('reservationsList').innerHTML = '<p>Erreur lors du chargement des réservations</p>';
+                document.getElementById('reservationsList').innerHTML = '<p>❌ Erreur lors du chargement des réservations</p>';
             }
         }
         
         // Rechercher par nom
         async function searchByNom() {
             const nom = document.getElementById('searchNom').value.trim();
-            if (!nom) return;
+            if (!nom) {
+                showNotification('⚠️ Veuillez saisir un nom à rechercher', 'error');
+                return;
+            }
             
             try {
                 const response = await fetch(`/reservations/search/${encodeURIComponent(nom)}`);
@@ -289,14 +342,17 @@
                 displayReservations(reservations);
                 document.getElementById('statsContainer').style.display = 'none';
             } catch (error) {
-                showNotification('Erreur lors de la recherche', 'error');
+                showNotification('❌ Erreur lors de la recherche', 'error');
             }
         }
         
         // Rechercher par CIN
         async function searchByCin() {
             const cin = document.getElementById('searchCin').value.trim();
-            if (!cin) return;
+            if (!cin) {
+                showNotification('⚠️ Veuillez saisir un CIN à rechercher', 'error');
+                return;
+            }
             
             try {
                 const response = await fetch(`/reservations/cin/${encodeURIComponent(cin)}`);
@@ -304,7 +360,7 @@
                 displayReservations(reservations);
                 document.getElementById('statsContainer').style.display = 'none';
             } catch (error) {
-                showNotification('Erreur lors de la recherche', 'error');
+                showNotification('❌ Erreur lors de la recherche', 'error');
             }
         }
         
@@ -316,7 +372,7 @@
                 displayStats(stats);
                 document.getElementById('statsContainer').style.display = 'block';
             } catch (error) {
-                showNotification('Erreur lors du chargement des statistiques', 'error');
+                showNotification('❌ Erreur lors du chargement des statistiques', 'error');
             }
         }
         
@@ -326,15 +382,15 @@
             statsGrid.innerHTML = `
                 <div class="stat-card">
                     <div class="stat-number">${stats.reservation_total}</div>
-                    <div>Total Réservations</div>
+                    <div>📊 Total Réservations</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-number">${stats.meilleur_reservation_villa_ref || 'N/A'}</div>
-                    <div>Meilleure Villa</div>
+                    <div>🏆 Meilleure Villa</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-number">${stats.montant_total}</div>
-                    <div>Montant Total</div>
+                    <div>💰 Montant Total</div>
                 </div>
             `;
         }
@@ -344,7 +400,7 @@
             const container = document.getElementById('reservationsList');
             
             if (reservations.length === 0) {
-                container.innerHTML = '<p>Aucune réservation trouvée.</p>';
+                container.innerHTML = '<p>📝 Aucune réservation trouvée.</p>';
                 return;
             }
             
@@ -352,16 +408,16 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>Nom Client</th>
-                            <th>CIN</th>
-                            <th>Email</th>
-                            <th>Personnes</th>
-                            <th>Prix/Nuit</th>
-                            <th>Arrivée</th>
-                            <th>Départ</th>
-                            <th>Statut</th>
-                            <th>Villa</th>
-                            <th>Actions</th>
+                            <th>👤 Nom Client</th>
+                            <th>🆔 CIN</th>
+                            <th>📧 Email</th>
+                            <th>👥 Personnes</th>
+                            <th>💰 Prix/Nuit</th>
+                            <th>📅 Arrivée</th>
+                            <th>📅 Départ</th>
+                            <th>📊 Statut</th>
+                            <th>🏠 Villa</th>
+                            <th>⚙️ Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -372,12 +428,12 @@
                                 <td>${reservation.email}</td>
                                 <td>${reservation.nombre_personnes}</td>
                                 <td>${reservation.prix_par_nuit} DT</td>
-                                <td>${new Date(reservation.date_arrivee).toLocaleDateString()}</td>
-                                <td>${new Date(reservation.date_depart).toLocaleDateString()}</td>
-                                <td>${reservation.statut}</td>
+                                <td>${new Date(reservation.date_arrivee).toLocaleDateString('fr-FR')}</td>
+                                <td>${new Date(reservation.date_depart).toLocaleDateString('fr-FR')}</td>
+                                <td><span style="background: ${getStatusColor(reservation.statut)}; padding: 2px 8px; border-radius: 12px; color: white; font-size: 0.8em;">${reservation.statut}</span></td>
                                 <td>${reservation.reference_villa}</td>
                                 <td>
-                                    <button onclick="deleteReservation('${reservation._id}')" class="btn-danger">Supprimer</button>
+                                    <button onclick="deleteReservation('${reservation._id}')" class="btn-danger">🗑️ Supprimer</button>
                                 </td>
                             </tr>
                         `).join('')}
@@ -388,9 +444,19 @@
             container.innerHTML = table;
         }
         
+        // Obtenir la couleur selon le statut
+        function getStatusColor(statut) {
+            switch(statut) {
+                case 'confirmée': return '#28a745';
+                case 'annulée': return '#dc3545';
+                case 'en attente': return '#ffc107';
+                default: return '#6c757d';
+            }
+        }
+        
         // Supprimer une réservation
         async function deleteReservation(id) {
-            if (!confirm('Êtes-vous sûr de vouloir supprimer cette réservation ?')) return;
+            if (!confirm('🗑️ Êtes-vous sûr de vouloir supprimer cette réservation ?')) return;
             
             try {
                 const response = await fetch(`/reservations/${id}`, {
@@ -400,20 +466,31 @@
                 const result = await response.json();
                 
                 if (response.ok) {
-                    showNotification('Réservation supprimée avec succès!', 'success');
+                    showNotification('✅ Réservation supprimée avec succès!', 'success');
                     loadAllReservations();
                 } else {
-                    showNotification(result.error ? result.error.join(', ') : 'Erreur lors de la suppression', 'error');
+                    const errorMsg = result.error ? result.error.join(', ') : 'Erreur lors de la suppression';
+                    showNotification('❌ ' + errorMsg, 'error');
                 }
             } catch (error) {
-                showNotification('Erreur de connexion', 'error');
+                showNotification('❌ Erreur de connexion', 'error');
             }
         }
         
         // Réinitialiser le formulaire
         function resetForm() {
             document.getElementById('reservationForm').reset();
+            setMinDate();
         }
+        
+        // Validation en temps réel des dates
+        document.getElementById('date_arrivee').addEventListener('change', function() {
+            const dateDepart = document.getElementById('date_depart');
+            dateDepart.min = this.value;
+            if (dateDepart.value && dateDepart.value <= this.value) {
+                dateDepart.value = '';
+            }
+        });
     </script>
 </body>
 </html>
