@@ -7,6 +7,7 @@
 var app = require('../app');
 var debug = require('debug')('examen-safaa-ltifi:server');
 var http = require('http');
+var socketIo = require('socket.io');
 
 /**
  * Get port from environment and store in Express.
@@ -20,6 +21,30 @@ app.set('port', port);
  */
 
 var server = http.createServer(app);
+
+/**
+ * Setup Socket.IO
+ */
+var io = socketIo(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+});
+
+// Middleware pour passer io aux routes
+app.use((req, res, next) => {
+  req.io = io;
+  next();
+});
+
+io.on('connection', (socket) => {
+  console.log('Un utilisateur s\'est connecté:', socket.id);
+  
+  socket.on('disconnect', () => {
+    console.log('Un utilisateur s\'est déconnecté:', socket.id);
+  });
+});
 
 /**
  * Listen on provided port, on all network interfaces.
